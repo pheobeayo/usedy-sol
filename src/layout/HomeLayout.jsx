@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ const HomeLayout = () => {
   const { isConnected } = useAppKitAccount();
   const navigate = useNavigate();
 
-  const handleRedirect = useCallback(async () => {
+  const handleRedirect = useCallback(() => {
     if (isConnected) {
       navigate("/dashboard");
     } else {
@@ -18,7 +18,7 @@ const HomeLayout = () => {
 
   useEffect(() => {
     handleRedirect();
-  }, [handleRedirect, isConnected]);
+  }, [handleRedirect]);
 
   return (
     <div>

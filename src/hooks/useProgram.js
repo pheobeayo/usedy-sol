@@ -1,39 +1,49 @@
+/**
+ * useProgram.js  (Reown AppKit Solana version)
+ * Replaces: useContractInstance.js
+ */
+
 import { useMemo } from "react";
 import { useAppKitProvider, useAppKitAccount } from "@reown/appkit/react";
 import { useAppKitConnection } from "@reown/appkit-adapter-solana/react";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
-import idl from "../idl/umarket.json"; 
+import { PublicKey, Connection } from "@solana/web3.js";
+import idl from "../idl/umarket.json";
+
 
 export const PROGRAM_ID = new PublicKey(
-  "82wC4Yky79wYGoEhKfYcCCcZiTQaCBLxPqAU8tKKrDkF"
+  import.meta.env.VITE_PROGRAM_ID 
 );
 
+
+const CUSTOM_RPC = import.meta.env.VITE_SOLANA_RPC_URL;
+const customConnection = CUSTOM_RPC
+  ? new Connection(CUSTOM_RPC, "confirmed")
+  : null;
+
 /**
- * @param {boolean} withSigner 
+ * @param {boolean} withSigner - true for write txns, false for reads
  * @returns {import("@coral-xyz/anchor").Program | null}
  */
 const useProgram = (withSigner = false) => {
-  const { connection } = useAppKitConnection();
+  const { connection: appKitConnection } = useAppKitConnection();
   const { walletProvider } = useAppKitProvider("solana");
   const { isConnected } = useAppKitAccount();
 
   return useMemo(() => {
+    const connection = customConnection ?? appKitConnection;
     if (!connection) return null;
 
     if (withSigner) {
       if (!isConnected || !walletProvider) return null;
 
-      // AppKit's walletProvider satisfies Anchor's wallet interface directly
       const provider = new AnchorProvider(connection, walletProvider, {
         commitment: "confirmed",
         preflightCommitment: "confirmed",
       });
-
       return new Program(idl, provider);
     }
 
-    // Read-only: no wallet needed
     const readOnlyWallet = {
       publicKey: null,
       signTransaction: async (tx) => tx,
@@ -43,9 +53,8 @@ const useProgram = (withSigner = false) => {
     const provider = new AnchorProvider(connection, readOnlyWallet, {
       commitment: "confirmed",
     });
-
     return new Program(idl, provider);
-  }, [connection, walletProvider, isConnected, withSigner]);
+  }, [appKitConnection, walletProvider, isConnected, withSigner]);
 };
 
 export default useProgram;
