@@ -11,7 +11,7 @@ const projectId = import.meta.env.VITE_PROJECTID;
 const metadata = {
   name: "Usedy",
   description: "Decentralised marketplace on Solana",
-  url: import.meta.env.VITE_APP_URL ?? "http://localhost:5173",
+  url: "http://localhost:5173",
   icons: ["./mark.svg"],
 };
 
