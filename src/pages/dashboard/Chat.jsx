@@ -2,15 +2,12 @@ import { useState, useEffect } from "react";
 import Gun from "gun";
 import { useAppKitAccount } from "@reown/appkit/react";
 
-
-
 const GunChat = ({ roomId }) => {
   const { address, isConnected } = useAppKitAccount();
   const [gun, setGun] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
- 
   const shortAddress = (addr) =>
     addr ? `${addr.slice(0, 8)}…${addr.slice(-4)}` : "";
 
@@ -20,7 +17,16 @@ const GunChat = ({ roomId }) => {
 
     const messagesRef = gunInstance.get("chat").get(roomId);
     messagesRef.map().on((message, key) => {
-      if (message) {
+      // ✅ Guard: only accept messages with the expected shape.
+      // Gun.js is a public peer — foreign/malformed objects (e.g. from other
+      // apps sharing the same relay) can arrive here and crash React if spread
+      // into JSX. We reject anything that doesn't look like our own messages.
+      if (
+        message &&
+        typeof message.text === "string" &&
+        typeof message.sender === "string" &&
+        typeof message.timestamp === "number"
+      ) {
         setMessages((prev) => {
           const exists = prev.find((m) => m.id === key);
           if (!exists) {
@@ -45,7 +51,7 @@ const GunChat = ({ roomId }) => {
       text: newMessage,
       sender: address,
       timestamp: Date.now(),
-      senderShort: shortAddress(address), // updated for base58
+      senderShort: shortAddress(address),
     });
     setNewMessage("");
   };
@@ -114,7 +120,9 @@ const GunChat = ({ roomId }) => {
                     })}
                   </span>
                 </div>
-                <div className="text-sm leading-relaxed">{message.text}</div>
+                <div className="text-sm leading-relaxed">
+                  {typeof message.text === "string" ? message.text : null}
+                </div>
               </div>
             </div>
           ))
@@ -145,7 +153,7 @@ const GunChat = ({ roomId }) => {
   );
 };
 
-// ─── Chat (page wrapper) ──────────────────────────────────────────────────────
+//  Chat (page wrapper) 
 
 const Chat = () => {
   const { address, isConnected } = useAppKitAccount();

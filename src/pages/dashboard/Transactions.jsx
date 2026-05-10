@@ -10,7 +10,7 @@ import bgIcon from "../../assets/transaction.png";
 import emptyCart from "../../assets/cart.png";
 import ApprovePayment from "../../components/ApprovePayment";
 import useGetPendingPayments from "../../hooks/useGetPendingPayments";
-import { useGetApprovedPayments } from "../../hooks/useGetPayments"; // named export
+import { useGetApprovedPayments } from "../../hooks/useGetApprovedPayments"; 
 import { useProduct } from "../../context/ContextProvider";
 import { formatPrice } from "../../utils/priceUtils";
 

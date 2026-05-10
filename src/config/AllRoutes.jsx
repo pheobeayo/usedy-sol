@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+
 import {
   createBrowserRouter,
   Route,
@@ -7,6 +8,19 @@ import {
 } from "react-router-dom";
 import Loader from "../components/Loader/Loader";
 import { ContextProvider } from "../context/ContextProvider";
+import { useRouteError } from "react-router-dom";
+
+const ErrorBoundary = () => {
+  const error = useRouteError();
+  console.error("Route error:", error);
+  return (
+    <div style={{ padding: 20, fontFamily: "monospace", background: "#1a1a1a", color: "#ff6b6b", minHeight: "100vh", whiteSpace: "pre-wrap" }}>
+      <h2>Error caught — check console for component stack</h2>
+      <pre style={{ color: "#fff" }}>{error?.message}</pre>
+      <pre style={{ color: "#aaa", fontSize: 11 }}>{error?.stack}</pre>
+    </div>
+  );
+};
 
 const Home = lazy(() => import("../pages/Home"));
 const DashboardLayout = lazy(() => import("../layout/DashboardLayout"));
@@ -29,18 +43,18 @@ const MarketplaceDetails = lazy(() =>
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
-      <Route path="/" element={<HomeLayout />}>
-        <Route index element={<Home />} />
-        <Route path="/marketplace" element={<MarketplaceHome />} />
-        <Route path="/marketplace/:id" element={<MarketplaceHomeDetails />} />
+      <Route path="/" element={<HomeLayout />} errorElement={<ErrorBoundary />}>
+        <Route index element={<Home />} errorElement={<ErrorBoundary />} />
+        <Route path="/marketplace" element={<MarketplaceHome />} errorElement={<ErrorBoundary />} />
+        <Route path="/marketplace/:id" element={<MarketplaceHomeDetails />} errorElement={<ErrorBoundary />} />
       </Route>
-      <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="createprofile" element={<CreateSellerProfile />} />
-        <Route path="market_place" element={<Marketplace />} />
-        <Route path="market_place/:id" element={<MarketplaceDetails />} />
-        <Route path="chat" element={<Chat />} />
-        <Route path="transactions" element={<Transactions />} />
+      <Route path="/dashboard" element={<DashboardLayout />} errorElement={<ErrorBoundary />}>
+        <Route index element={<Dashboard />} errorElement={<ErrorBoundary />} />
+        <Route path="createprofile" element={<CreateSellerProfile />} errorElement={<ErrorBoundary />} />
+        <Route path="market_place" element={<Marketplace />} errorElement={<ErrorBoundary />} />
+        <Route path="market_place/:id" element={<MarketplaceDetails />} errorElement={<ErrorBoundary />} />
+        <Route path="chat" element={<Chat />} errorElement={<ErrorBoundary />} />
+        <Route path="transactions" element={<Transactions />} errorElement={<ErrorBoundary />} />
       </Route>
     </Route>
   )

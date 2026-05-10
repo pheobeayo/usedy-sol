@@ -1,7 +1,22 @@
 import React from "react";
 import heroImg from "../assets/hero.jpg";
+import { useNavigate } from "react-router-dom";
+import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const { isConnected } = useAppKitAccount();
+  const { open } = useAppKit();
+
+  const handleNav = (path) => {
+    if (isConnected) {
+      navigate(path);
+    } else {
+      // Open wallet connect modal, then user can navigate after connecting
+      open();
+    }
+  };
+
   return (
     <div
       style={{ backgroundImage: `url(${heroImg})` }}
@@ -17,13 +32,20 @@ const Hero = () => {
           revolution with every sale and purchase
         </p>
         <div className="mt-6">
-          <button className="bg-[#154A80] rounded-lg p-3 text-white mr-4 text-[18px]">
+          <button
+            onClick={() => handleNav("/dashboard/createprofile")}
+            className="bg-[#154A80] rounded-lg p-3 text-white mr-4 text-[18px] hover:bg-[#1a5c99] transition-colors"
+          >
             Sell Products
           </button>
-          <button className="border border-[#154A80] rounded-lg p-3 text-[#154A80] bg-white text-[18px]">
+          <button
+            onClick={() => handleNav("/dashboard/market_place")}
+            className="border border-[#154A80] rounded-lg p-3 text-[#154A80] bg-white text-[18px] hover:bg-[#154A80] hover:text-white transition-colors"
+          >
             Buy Products
           </button>
         </div>
+
       </div>
     </div>
   );

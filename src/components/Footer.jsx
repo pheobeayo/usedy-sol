@@ -20,7 +20,7 @@ const Footer = () => {
           <p className="lg:w-[80%] md:w-[80%] w-[100%]">Where environmental consciousness meets blockchain innovation</p>
         </div>
         <div className="flex items-center justify-between flex-col lg:flex-row md:flex-row text-center lg:text-left md:text-left">
-          <p className="mb-4">&copy; 2025 Usedy</p>
+          <p className="mb-4">&copy; 2026 Usedy</p>
           <div className="flex items-center justify-between flex-col lg:flex-row md:flex-row">
             <p className="lg:mr-8 md:mr-8 mb-4">privacy Policy</p>
             <p className="lg:mr-8 md:mr-8 mb-4">Terms</p>

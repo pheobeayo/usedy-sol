@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { BN } from "@coral-xyz/anchor";
 import useProgram from "./useProgram";
 
 const convertIpfsUrl = (url) => {
@@ -12,7 +11,7 @@ const convertIpfsUrl = (url) => {
 const useGetProduct = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const program = useProgram(false); // read-only
+  const program = useProgram(false);
 
   const fetchProducts = useCallback(async () => {
     if (!program) return;
@@ -20,30 +19,33 @@ const useGetProduct = () => {
     try {
       const raw = await program.account.product.all();
 
-      const normalized = raw.map(({ publicKey, account }) => ({
-        publicKey: publicKey.toBase58(),
-        productId: account.productId.toNumber(),
-        address: account.owner.toBase58(),         // seller wallet
-        name: account.name,
-        image: convertIpfsUrl(account.image),
-        location: account.location,
-        product: account.description,              // aliased for UI compat
-        description: account.description,
-        price: account.price,                      // BN — keep as BN for math
-        priceNumber: account.price.toNumber(),     // convenience
-        weight: account.totalWeight,               // BN
-        weightNumber: account.totalWeight.toNumber(),
-        sold: account.sold.toNumber(),
-        inProgress: account.inProgress.toNumber(),
-        paymentMode: account.paymentMode,          // { sol:{} } | { spl:{} }
-        negotiationTiers: account.negotiationTiers.map((t) => ({
-          quantity: t.quantity.toNumber(),
-          discountPercentage: t.discountPercentage,
-        })),
-      }));
+      const normalized = raw
+        .map(({ publicKey, account }) => {
+          const isSpl = account.paymentMode && "Spl" in account.paymentMode;
+          return {
+            id: account.productId.toNumber(),
+            publicKey: publicKey.toBase58(),
+            address: account.owner.toBase58(),
+            name: account.name,
+            image: convertIpfsUrl(account.image),
+            location: account.location,
+            product: account.description,
+            description: account.description,
+            price: account.price.toNumber(),
+            weight: account.totalWeight.toNumber(),
+            sold: account.sold.toNumber(),
+            inProgress: account.inProgress.toNumber(),
+            paymentMode: account.paymentMode,
+            isSpl,
+            paymentSymbol: isSpl ? "USDC" : "SOL",
+            negotiationTiers: account.negotiationTiers.map((t) => ({
+              quantity: t.quantity.toNumber(),
+              discountPercentage: Number(t.discountPercentage),
+            })),
+          };
+        })
+        .sort((a, b) => a.id - b.id);
 
-      // Sort by productId ascending
-      normalized.sort((a, b) => a.productId - b.productId);
       setProducts(normalized);
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -58,7 +60,7 @@ const useGetProduct = () => {
   }, [fetchProducts]);
 
   return {
-    product: products,   
+    product: products,
     products,
     loading,
     refreshProducts: fetchProducts,
